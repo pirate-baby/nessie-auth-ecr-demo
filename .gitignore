@@ -1,0 +1,6 @@
+# secrets
+.env
+
+# db data
+.data/*
+!/.data/.gitkeep
