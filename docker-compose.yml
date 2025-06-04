@@ -1,24 +1,24 @@
 services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:latest
-    container_name: keycloak
-    environment:
-      KEYCLOAK_ADMIN: keycloakadmin
-      KEYCLOAK_ADMIN_PASSWORD: keycloakadmin
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-    ports:
-      - "8080:8080"
-    command: start-dev
-    volumes:
-      - ./.data/keycloak:/opt/keycloak/data
-    depends_on:
-      database:
-        condition: service_healthy
-      database-init:
-        condition: service_completed_successfully
+  #keycloak:
+    #image: quay.io/keycloak/keycloak:latest
+    #container_name: keycloak
+    #environment:
+      #KEYCLOAK_ADMIN: keycloakadmin
+      #KEYCLOAK_ADMIN_PASSWORD: keycloakadmin
+      #KC_DB: postgres
+      #KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      #KC_DB_USERNAME: keycloak
+      #KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    #ports:
+      #- "8080:8080"
+    #command: start-dev
+    #volumes:
+      #- ./.data/keycloak:/opt/keycloak/data
+    #depends_on:
+      #database:
+        #condition: service_healthy
+      #database-init:
+        #condition: service_completed_successfully
 
   database:
     image: postgres:15
@@ -85,15 +85,11 @@ services:
       - nessie.catalog.service.s3.default-options.access-key=urn:nessie-secret:quarkus:nessie.catalog.secrets.access-key
       - nessie.catalog.service.s3.default-options.path-style-access=true
         # auth bits
+      - QUARKUS_LOG_LEVEL=DEBUG
+      - quarkus.log.category."io.smallrye.config".level=DEBUG
+
+
       - nessie.server.authentication.enabled=true
-
-      - quarkus.log.category."io.quarkus.oidc".level=DEBUG
-      - quarkus.log.category."io.quarkus.oidc.runtime".level=DEBUG
-      - quarkus.log.category."io.quarkus.oidc.client".level=DEBUG
-      - quarkus.log.category."io.quarkus.oidc.common".level=DEBUG
-      - quarkus.log.category."io.quarkus.oidc".min-level=DEBUG
-      - quarkus.log.level=INFO
-
       - quarkus.oidc.auth-server-url=https://login.microsoftonline.com/${LOCKNESSIE_OPENID_TENANT}/v2.0
       - quarkus.oidc.client-id=${LOCKNESSIE_OPENID_CLIENT_ID}
       - quarkus.oidc.credentials.secret=${LOCKNESSIE_OPENID_SECRET}
@@ -127,6 +123,9 @@ services:
       - ./.data/jupyter/work:/home/jovyan/work
     environment:
       - LOCKNESSIE_OPENID_CLIENT_ID=${LOCKNESSIE_OPENID_CLIENT_ID}
+      - LOCKNESSIE_OPENID_TENANT=${LOCKNESSIE_OPENID_TENANT}
+      - LOCKNESSIE_OPENID_ISSUER=${LOCKNESSIE_OPENID_ISSUER}
+      - LOCKNESSIE_OPENID_ALLOW_ALL_TENANTS=false
     entrypoint: ["jupyter","notebook", "--ip='*'","--NotebookApp.token=''","--NotebookApp.password=''"]
     networks:
       - nessie-auth-demo
