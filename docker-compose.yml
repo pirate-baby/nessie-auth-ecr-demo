@@ -20,6 +20,19 @@ services:
       #database-init:
         #condition: service_completed_successfully
 
+  jwt-validator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jwt-validator
+    environment:
+      - LOCKNESSIE_OPENID_CLIENT_ID=${LOCKNESSIE_OPENID_CLIENT_ID}
+      - LOCKNESSIE_OPENID_TENANT=${LOCKNESSIE_OPENID_TENANT}
+      - LOCKNESSIE_OPENID_SECRET=${LOCKNESSIE_OPENID_SECRET}
+      - TOKEN=${TOKEN}
+    networks:
+      - nessie-auth-demo
+
   database:
     image: postgres:15
     container_name: database
