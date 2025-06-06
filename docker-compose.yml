@@ -90,6 +90,21 @@ services:
 
 
       - nessie.server.authentication.enabled=true
+      - quarkus.log.console.level=DEBUG
+      - quarkus.log.category."io.quarkus.oidc".level=TRACE
+      - quarkus.log.category."io.quarkus.oidc".min-level=TRACE
+      - quarkus.log.category."io.quarkus.oidc.runtime.OidcProvider".level=TRACE
+      - quarkus.log.category."io.quarkus.oidc.runtime.OidcProvider".min-level=TRACE
+      - quarkus.log.category."io.quarkus.oidc.runtime.OidcRecorder".level=TRACE
+      - quarkus.log.category."io.quarkus.oidc.runtime.OidcRecorder".min-level=TRACE
+      - quarkus.log.category."io.quarkus.oidc.runtime.OidcIdentityProvider".level=TRACE
+      - quarkus.log.category."io.quarkus.oidc.runtime.OidcIdentityProvider".min-level=TRACE
+      - quarkus.log.category."io.quarkus.security".level=TRACE
+      - quarkus.log.category."io.vertx.ext.auth".level=TRACE
+
+      #- quarkus.oidc.provider=microsoft
+      - quarkus.oidc.application-type=service
+      - quarkus.oidc.jwks-path=https://login.microsoftonline.com/${LOCKNESSIE_OPENID_TENANT}/discovery/keys
       - quarkus.oidc.auth-server-url=https://login.microsoftonline.com/${LOCKNESSIE_OPENID_TENANT}/v2.0
       - quarkus.oidc.client-id=${LOCKNESSIE_OPENID_CLIENT_ID}
       - quarkus.oidc.credentials.secret=${LOCKNESSIE_OPENID_SECRET}
