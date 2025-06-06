@@ -1,14 +1,28 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ -z "$TOKEN" ] || [ -z "$LOCKNESSIE_OPENID_CLIENT_ID" ] || [ -z "$LOCKNESSIE_OPENID_TENANT" ] || [ -z "$LOCKNESSIE_OPENID_SECRET" ]; then
-    echo "Error: Required environment variables are not set"
-    echo "TOKEN: $TOKEN"
-    echo "CLIENT_ID: $LOCKNESSIE_OPENID_CLIENT_ID"
-    echo "TENANT: $LOCKNESSIE_OPENID_TENANT"
-    echo "SECRET: $LOCKNESSIE_OPENID_SECRET"
+# Check if required environment variables are set
+if [ -z "$LOCKNESSIE_OPENID_CLIENT_ID" ]; then
+    echo "Error: LOCKNESSIE_OPENID_CLIENT_ID is not set"
     exit 1
 fi
 
-JWKS_URL="https://login.microsoftonline.com/${LOCKNESSIE_OPENID_TENANT}/discovery/keys"
+if [ -z "$LOCKNESSIE_OPENID_TENANT" ]; then
+    echo "Error: LOCKNESSIE_OPENID_TENANT is not set"
+    exit 1
+fi
 
-java -cp jwt-validator.jar com.example.JwtValidator "$TOKEN" "$LOCKNESSIE_OPENID_CLIENT_ID" "$JWKS_URL" "$LOCKNESSIE_OPENID_SECRET"
+if [ -z "$LOCKNESSIE_OPENID_SECRET" ]; then
+    echo "Error: LOCKNESSIE_OPENID_SECRET is not set"
+    exit 1
+fi
+
+if [ -z "$TOKEN" ]; then
+    echo "Error: TOKEN is not set"
+    exit 1
+fi
+
+# Construct the JWKS URL
+JWKS_URL="https://login.microsoftonline.com/${LOCKNESSIE_OPENID_TENANT}/discovery/v2.0/keys"
+
+# Run the Java JWT validator
+java -jar /app/jwt-validator.jar "$TOKEN" "$LOCKNESSIE_OPENID_CLIENT_ID" "$JWKS_URL" "$LOCKNESSIE_OPENID_SECRET"

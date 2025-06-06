@@ -40,7 +40,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>JwtValidator</mainClass>
+                            <mainClass>com.example.JwtValidator</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
