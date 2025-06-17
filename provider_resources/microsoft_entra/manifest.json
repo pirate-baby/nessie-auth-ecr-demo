@@ -1,0 +1,134 @@
+{
+	"id": "zzzzzzz0-dddd-cccc-dddd-yyyyyyyyyyyy",
+	"acceptMappedClaims": null,
+	"accessTokenAcceptedVersion": 2,
+	"addIns": [],
+	"allowPublicClient": true,
+	"appId": "aaaaaaa0-bbbb-cccc-dddd-eeeeeeeeeeee",
+	"appRoles": [
+		{
+			"allowedMemberTypes": [
+				"Application"
+			],
+			"description": "Allows CRUD in the data lake (for service only)",
+			"displayName": "DataLakeServiceRole",
+			"id": "xxxxxx0-dddd-cccc-dddd-bbbbbbbbbbbb",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "main.All"
+		},
+		{
+			"allowedMemberTypes": [
+				"User"
+			],
+			"description": "Read Only users can read from the main branch of data",
+			"displayName": "DataLakeMainReadOnly",
+			"id": "rrrrrr0-dddd-cccc-dddd-bbbbbbbbbbbb",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "main.Read"
+		}
+	],
+	"oauth2AllowUrlPathMatching": false,
+	"createdDateTime": "2025-06-03T18:25:35Z",
+	"description": null,
+	"certification": null,
+	"disabledByMicrosoftStatus": null,
+	"groupMembershipClaims": "ApplicationGroup",
+	"identifierUris": [],
+	"informationalUrls": {
+		"termsOfService": null,
+		"support": null,
+		"privacy": null,
+		"marketing": null
+	},
+	"keyCredentials": [],
+	"knownClientApplications": [],
+	"logoUrl": null,
+	"logoutUrl": null,
+	"name": "Data Lake Tooling - Staging",
+	"notes": null,
+	"oauth2AllowIdTokenImplicitFlow": false,
+	"oauth2AllowImplicitFlow": false,
+	"oauth2Permissions": [],
+	"oauth2RequirePostResponse": false,
+	"optionalClaims": {
+		"idToken": [
+			{
+				"name": "groups",
+				"source": null,
+				"essential": false,
+				"additionalProperties": [
+					"cloud_displayname"
+				]
+			},
+			{
+				"name": "roles",
+				"source": null,
+				"essential": false,
+				"additionalProperties": []
+			}
+		],
+		"accessToken": [
+			{
+				"name": "groups",
+				"source": null,
+				"essential": false,
+				"additionalProperties": [
+					"cloud_displayname"
+				]
+			}
+		],
+		"saml2Token": [
+			{
+				"name": "groups",
+				"source": null,
+				"essential": false,
+				"additionalProperties": []
+			}
+		]
+	},
+	"orgRestrictions": [],
+	"parentalControlSettings": {
+		"countriesBlockedForMinors": [],
+		"legalAgeGroupRule": "Allow"
+	},
+	"passwordCredentials": [
+		{
+			"customKeyIdentifier": null,
+			"endDate": "2027-06-03T19:52:11.544Z",
+			"keyId": "kkkkkk0-dddd-cccc-dddd-bbbbbbbbbbbb",
+			"startDate": "2025-06-03T19:52:11.544Z",
+			"value": null,
+			"createdOn": "2025-06-03T19:52:22.2006513Z",
+			"hint": "Qwe",
+			"displayName": "data lake"
+		}
+	],
+	"preAuthorizedApplications": [],
+	"publisherDomain": "pirate.baby",
+	"replyUrlsWithType": [
+		{
+			"url": "http://localhost:1234",
+			"type": "InstalledClient"
+		}
+	],
+	"requiredResourceAccess": [
+		{
+			"resourceAppId": "aaaaaaa0-bbbb-cccc-dddd-eeeeeeeeeeee",
+			"resourceAccess": [
+				{
+					"id": "xxxxxx0-dddd-cccc-dddd-bbbbbbbbbbbb",
+					"type": "Role"
+				}
+			]
+		}
+	],
+	"samlMetadataUrl": null,
+	"signInUrl": null,
+	"signInAudience": "AzureADMyOrg",
+	"tags": [],
+	"tokenEncryptionKeyId": null
+}

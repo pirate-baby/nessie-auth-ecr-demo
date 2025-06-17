@@ -1,37 +1,26 @@
 services:
-  #keycloak:
-    #image: quay.io/keycloak/keycloak:latest
-    #container_name: keycloak
-    #environment:
-      #KEYCLOAK_ADMIN: keycloakadmin
-      #KEYCLOAK_ADMIN_PASSWORD: keycloakadmin
-      #KC_DB: postgres
-      #KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      #KC_DB_USERNAME: keycloak
-      #KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-    #ports:
-      #- "8080:8080"
-    #command: start-dev
-    #volumes:
-      #- ./.data/keycloak:/opt/keycloak/data
-    #depends_on:
-      #database:
-        #condition: service_healthy
-      #database-init:
-        #condition: service_completed_successfully
-
-  jwt-validator:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: jwt-validator
+  keycloak:
+    profiles:
+      - keycloak
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
     environment:
-      - LOCKNESSIE_OPENID_CLIENT_ID=${LOCKNESSIE_OPENID_CLIENT_ID}
-      - LOCKNESSIE_OPENID_TENANT=${LOCKNESSIE_OPENID_TENANT}
-      - LOCKNESSIE_OPENID_SECRET=${LOCKNESSIE_OPENID_SECRET}
-      - TOKEN=${TOKEN}
-    networks:
-      - nessie-auth-demo
+      KEYCLOAK_ADMIN: keycloakadmin
+      KEYCLOAK_ADMIN_PASSWORD: keycloakadmin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    ports:
+      - "8080:8080"
+    command: start-dev
+    volumes:
+      - ./.data/keycloak:/opt/keycloak/data
+    depends_on:
+      database:
+        condition: service_healthy
+      database-init:
+        condition: service_completed_successfully
 
   database:
     image: postgres:15
@@ -83,50 +72,69 @@ services:
     image: ghcr.io/projectnessie/nessie:0.102.4
     container_name: nessie
     environment:
+
+      # database backend
       - quarkus.datasource.postgresql.jdbc.url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/nessie
       - quarkus.datasource.postgresql.password=${NESSIE_DB_PASSWORD}
+      - nessie.version.store.type=JDBC2
+      - nessie.version.store.persist.jdbc.datasource=postgresql
+      - quarkus.datasource.postgresql.username=nessie
+
+      # s3 access for nessie server
       - nessie.catalog.warehouses.warehouse.location=s3://${S3_DATA_LAKE_BUCKET}/
       - nessie.catalog.service.s3.default-options.endpoint=${AWS_URL}/
       - nessie.catalog.secrets.access-key.name=${AWS_ACCESS_KEY_ID}
       - nessie.catalog.secrets.access-key.secret=${AWS_SECRET_ACCESS_KEY}
       - nessie.catalog.service.s3.default-options.region=${AWS_DEFAULT_REGION}
-
-      - nessie.version.store.type=JDBC2
-      - nessie.version.store.persist.jdbc.datasource=postgresql
-      - quarkus.datasource.postgresql.username=nessie
-      - nessie.catalog.default-warehouse=warehouse
       - nessie.catalog.service.s3.default-options.access-key=urn:nessie-secret:quarkus:nessie.catalog.secrets.access-key
       - nessie.catalog.service.s3.default-options.path-style-access=true
-        # auth bits
-      - QUARKUS_LOG_LEVEL=DEBUG
-      - quarkus.log.category."io.smallrye.config".level=DEBUG
+
+      # allow health checks on port 9000 at /q/health. deny all other /q/* (management endpoints)
+      - quarkus.management.enabled=true
+      - quarkus.management.root-path=/q
+      - quarkus.management.port=9000
+      - quarkus.http.auth.proactive=false
+      - quarkus.management.auth.enabled=false
+      - quarkus.management.auth.permission.health.paths=/q/health
+      - quarkus.management.auth.permission.health.policy=permit
+      - quarkus.management.auth.permission.deny-all.paths=/q/*
+      - quarkus.management.auth.permission.deny-all.policy=deny
 
 
+      # the actual warehouse name
+      - nessie.catalog.default-warehouse=warehouse
+
+
+      # AUTHENTICATION: general
       - nessie.server.authentication.enabled=true
-      - quarkus.log.console.level=DEBUG
-      - quarkus.log.category."io.quarkus.oidc".level=TRACE
-      - quarkus.log.category."io.quarkus.oidc".min-level=TRACE
-      - quarkus.log.category."io.quarkus.oidc.runtime.OidcProvider".level=TRACE
-      - quarkus.log.category."io.quarkus.oidc.runtime.OidcProvider".min-level=TRACE
-      - quarkus.log.category."io.quarkus.oidc.runtime.OidcRecorder".level=TRACE
-      - quarkus.log.category."io.quarkus.oidc.runtime.OidcRecorder".min-level=TRACE
-      - quarkus.log.category."io.quarkus.oidc.runtime.OidcIdentityProvider".level=TRACE
-      - quarkus.log.category."io.quarkus.oidc.runtime.OidcIdentityProvider".min-level=TRACE
-      - quarkus.log.category."io.quarkus.security".level=TRACE
-      - quarkus.log.category."io.vertx.ext.auth".level=TRACE
 
-      #- quarkus.oidc.provider=microsoft
-      - quarkus.oidc.application-type=service
-      - quarkus.oidc.jwks-path=https://login.microsoftonline.com/${LOCKNESSIE_OPENID_TENANT}/discovery/keys
-      - quarkus.oidc.auth-server-url=https://login.microsoftonline.com/${LOCKNESSIE_OPENID_TENANT}/v2.0
+      # AUTHENTICATION: OIDC
+      - quarkus.oidc.auth-server-url=${AUTH_SERVER_URL}
       - quarkus.oidc.client-id=${LOCKNESSIE_OPENID_CLIENT_ID}
       - quarkus.oidc.credentials.secret=${LOCKNESSIE_OPENID_SECRET}
-      - nessie.server.authorization.rules.allow_all=true
+      - quarkus.oidc.roles.role-claim-path=${ROLE_CLAIM_PATH}
+
+      # AUTHENTICATION: request signing
+      - nessie.catalog.service.s3.default-options.request-signing-enabled=true
+      - nessie.catalog.service.s3.default-options.url-signing-expire=3600
+
+      # AUTHORIZATION: general
+      - nessie.server.authorization.enabled=true
+
+      # AUTHORIZATION: rules: read main
+      - nessie.server.authorization.rules.allow_read_main=op in ['VIEW_REFERENCE', 'VIEW_COMMIT', 'READ_ENTRIES'] && ref == 'main' && 'main.Read' in roles
+
+      # AUTHORIZATION: rules: read and write other branches
+      - nessie.server.authorization.rules.allow_all_non_main=ref != 'main' && 'non-main.All' in roles
+
+      # AUTHORIZATION: rules: write main for service account
+      - nessie.server.authorization.rules.allow_write_main=ref == 'main' && 'main.All' in roles
+
 
     networks:
       - nessie-auth-demo
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:19120/q/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/q/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -140,6 +148,22 @@ services:
       database-init:
         condition: service_completed_successfully
 
+  #el-script:
+    #image: demo-el-script:latest
+    #container_name: el-script
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
+    #environment:
+      #- LOCKNESSIE_OPENID_SECRET=${LOCKNESSIE_OPENID_SECRET}
+      #- LOCKNESSIE_OPENID_CLIENT_ID=${LOCKNESSIE_OPENID_CLIENT_ID}
+      #- LOCKNESSIE_OPENID_TENANT=${LOCKNESSIE_OPENID_TENANT}
+      #- LOCKNESSIE_OPENID_ISSUER=${LOCKNESSIE_OPENID_ISSUER}
+    #networks:
+      #- nessie-auth-demo
+    #depends_on:
+      #nessie:
+        #condition: service_healthy
   notebook:
     image: quay.io/jupyter/minimal-notebook:lab-4.3.5
     profiles:
@@ -150,13 +174,17 @@ services:
     volumes:
       - ./.data/jupyter/work:/home/jovyan/work
     environment:
+      # these are only here to keep secret values out of the notebook
+      - LOCKNESSIE_OPENID_SECRET=${LOCKNESSIE_OPENID_SECRET}
       - LOCKNESSIE_OPENID_CLIENT_ID=${LOCKNESSIE_OPENID_CLIENT_ID}
       - LOCKNESSIE_OPENID_TENANT=${LOCKNESSIE_OPENID_TENANT}
       - LOCKNESSIE_OPENID_ISSUER=${LOCKNESSIE_OPENID_ISSUER}
-      - LOCKNESSIE_OPENID_ALLOW_ALL_TENANTS=false
     entrypoint: ["jupyter","notebook", "--ip='*'","--NotebookApp.token=''","--NotebookApp.password=''"]
     networks:
       - nessie-auth-demo
+#    depends_on:
+      #el-script:
+        #condition: service_completed_successfully
 
   minio:
     image: quay.io/minio/minio

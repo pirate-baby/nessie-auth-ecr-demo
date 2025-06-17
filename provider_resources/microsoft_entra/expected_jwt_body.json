@@ -1,0 +1,25 @@
+// If you did it correctly, this is what the JWT body should look like for a user authed token that has the main.Read role
+{
+    "aud": "<your-client-id>",
+    "iss": "https://login.microsoftonline.com/<your-tenant-id>/v2.0",
+    "iat": 1750180044,
+    "nbf": 1750180044,
+    "exp": 1750183944,
+    "groups": [
+      "grp-datalake-readonly-stg",
+      "grp-datalake-readonly-stg"
+    ],
+    "name": "Your Name",
+    "nonce": "cff82537a13bb1a42161e4a40a51b2d9ef2f8aaa5fec7509f4b36df50d2b46c4",
+    "oid": "xxxxxxxx-yyyy-zzzz-aaaa-bbbbbbbbbbbb",
+    "preferred_username": "your.name@pirate.baby",
+    "rh": "1.zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz.",
+    "roles": [
+      "main.Read"
+    ],
+    "sid": "xxxxxxxx-yyyy-zzzz-aaaa-bbbbbbbbbbbb",
+    "sub": "pn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "tid": "<your-tenant-id>",
+    "uti": "xxxxxxxx-yyyy-zzzz-aaaa-bbbbbbbbbbbb",
+    "ver": "2.0"
+  }

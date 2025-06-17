@@ -1,14 +1,23 @@
-# Build stage
-FROM maven:3.9-eclipse-temurin-11 AS build
-WORKDIR /app
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package
+# Use Python 3.9 as base image
+FROM python:3.9-slim
 
-# Run stage
-FROM eclipse-temurin:11-jre
+# Set working directory
 WORKDIR /app
-COPY --from=build /app/target/jwt-validator-1.0-SNAPSHOT-jar-with-dependencies.jar /app/jwt-validator.jar
-COPY validate-token.sh /app/validate-token.sh
-RUN chmod +x /app/validate-token.sh
-ENTRYPOINT ["/app/validate-token.sh"]
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    pyarrow \
+    pyiceberg \
+    locknessie[microsoft] \
+    s3fs
+
+# Copy the script
+COPY el_script.py .
+
+# Run the script
+CMD ["python", "el_script.py"]
