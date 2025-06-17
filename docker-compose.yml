@@ -90,11 +90,6 @@ services:
       - nessie.catalog.service.s3.default-options.path-style-access=true
 
       # allow health checks on port 9000 at /q/health. deny all other /q/* (management endpoints)
-      - quarkus.management.enabled=true
-      - quarkus.management.root-path=/q
-      - quarkus.management.port=9000
-      - quarkus.http.auth.proactive=false
-      - quarkus.management.auth.enabled=false
       - quarkus.management.auth.permission.health.paths=/q/health
       - quarkus.management.auth.permission.health.policy=permit
       - quarkus.management.auth.permission.deny-all.paths=/q/*
