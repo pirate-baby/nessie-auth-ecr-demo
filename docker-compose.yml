@@ -95,7 +95,6 @@ services:
       - quarkus.management.auth.permission.deny-all.paths=/q/*
       - quarkus.management.auth.permission.deny-all.policy=deny
 
-
       # the actual warehouse name
       - nessie.catalog.default-warehouse=warehouse
 
@@ -116,11 +115,11 @@ services:
       # AUTHORIZATION: general
       - nessie.server.authorization.enabled=true
 
-      # AUTHORIZATION: rules: read main
-      - nessie.server.authorization.rules.allow_read_main=op in ['VIEW_REFERENCE', 'VIEW_COMMIT', 'READ_ENTRIES'] && ref == 'main' && 'main.Read' in roles
+      # AUTHORIZATION: rules: read main can read all of the main branch
+      - nessie.server.authorization.rules.allow_read_main=ref == "main" && op in ["VIEW_REFERENCE", "VIEW_NAMESPACE", "LIST_ENTRIES", "READ_ENTRIES", "READ_CONTENT_KEY", "READ_ENTITY_VALUE", "GET_NAMESPACE", "GET_ENTRY", "GET_COMMIT_LOG", "GET_COMMIT", "GET_TAG", "GET_BRANCH", "GET_REFERENCE_BY_NAME", "GET_REFERENCE", "GET_DIFF", "GET_CONTENT"] && 'main.Read' in roles
 
       # AUTHORIZATION: rules: read and write other branches
-      - nessie.server.authorization.rules.allow_all_non_main=ref != 'main' && 'non-main.All' in roles
+      - nessie.server.authorization.rules.allow_all_features=ref != 'main' && 'feature.All' in roles
 
       # AUTHORIZATION: rules: write main for service account
       - nessie.server.authorization.rules.allow_write_main=ref == 'main' && 'main.All' in roles
@@ -143,22 +142,22 @@ services:
       database-init:
         condition: service_completed_successfully
 
-  #el-script:
-    #image: demo-el-script:latest
-    #container_name: el-script
-    #build:
-      #context: .
-      #dockerfile: Dockerfile
-    #environment:
-      #- LOCKNESSIE_OPENID_SECRET=${LOCKNESSIE_OPENID_SECRET}
-      #- LOCKNESSIE_OPENID_CLIENT_ID=${LOCKNESSIE_OPENID_CLIENT_ID}
-      #- LOCKNESSIE_OPENID_TENANT=${LOCKNESSIE_OPENID_TENANT}
-      #- LOCKNESSIE_OPENID_ISSUER=${LOCKNESSIE_OPENID_ISSUER}
-    #networks:
-      #- nessie-auth-demo
-    #depends_on:
-      #nessie:
-        #condition: service_healthy
+  el-script:
+    image: demo-el-script:latest
+    container_name: el-script
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - LOCKNESSIE_OPENID_SECRET=${LOCKNESSIE_OPENID_SECRET}
+      - LOCKNESSIE_OPENID_CLIENT_ID=${LOCKNESSIE_OPENID_CLIENT_ID}
+      - LOCKNESSIE_OPENID_TENANT=${LOCKNESSIE_OPENID_TENANT}
+      - LOCKNESSIE_OPENID_ISSUER=${LOCKNESSIE_OPENID_ISSUER}
+    networks:
+      - nessie-auth-demo
+    depends_on:
+      nessie:
+        condition: service_healthy
   notebook:
     image: quay.io/jupyter/minimal-notebook:lab-4.3.5
     profiles:
@@ -167,7 +166,7 @@ services:
       - "8888:8888"
       - "1234:1234"
     volumes:
-      - ./.data/jupyter/work:/home/jovyan/work
+      - ./nessie_auth_example.ipynb:/home/jovyan/work/nessie_auth_example.ipynb
     environment:
       # these are only here to keep secret values out of the notebook
       - LOCKNESSIE_OPENID_SECRET=${LOCKNESSIE_OPENID_SECRET}
