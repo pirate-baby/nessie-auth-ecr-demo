@@ -3,8 +3,14 @@
 This is a working example of an end-to-end Nessie deployment to AWS ECR, with both a local human client (via Jupyter) and a machine client (ie service or EL).
 
 ## Supported IDP Examples
-[![microsoft logo](https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1024px-Microsoft_logo.svg.png?20210729021049 | width=50) Microsoft Entra](provider_resources/microsoft_entra/README.md)
 
+<ul>
+    <li>
+        <a href="provider_resources/microsoft_entra/README.md">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1024px-Microsoft_logo.svg.png" width="25"> Microsoft Entra
+        </a>
+    </li>
+</ul>
 
 ## What does this solve?
 Nessie utilizes OpenID auth to determine both login identity (_authentication_) and permissions (_authorization_). This is a great practice, but can add great complexity to Iceberg clients that now need to support an Oauth2 flow. Enter the setup in this repo.
