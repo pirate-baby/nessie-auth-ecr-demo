@@ -18,7 +18,7 @@ Nessie utilizes OpenID auth to determine both login identity (_authentication_) 
 ## How does it work?
 OpenID identification and access tokens are highly portable by design, and we will leverage this to create a single auth system that can be used for both local and peer ECR container auth by leveraging the [locknessie](https://github.com/piratebaby/lock-nessie) package. This simplifies the middleware of OIDC security, but does not remove the complexity in the Data Lakehouse components. That complexity includes:
 
-- The [CEL](https://cel.dev/) based RBA
+- The [CEL](https://cel.dev/) based RBAC
 - The ID Provider (IDP) configurations for OIDC flows, roles and groups, allowed URIs, and audiences
 - The storage provider methods of authentication & authorization (vended credentials, request signing etc)
 
